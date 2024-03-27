@@ -5,7 +5,7 @@ Open Flightline project based on single user and geopackage data storage
 ## Installing and Configuration
 Although this toolset will work on most versions of QGIS, it is suggested that QGIS 3.34 is used.
 
-1.	Download or clone a copy of the repo from here: https://github.com/zero-invasive-predators/open-flightline-mini
+1.	Download or clone a copy of the repo from here: https://github.com/zero-invasive-predators/open-flightline-mini-public
 2.	Open up QGIS and go to the File Menu, then to Settings then to Options.
 3.	In the Options dialog box, go to the Processing tab.
 4.	Expand out the Scripts Setting and click the three dots to edit the Value
