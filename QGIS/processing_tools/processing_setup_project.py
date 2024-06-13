@@ -13,7 +13,7 @@
 import sys
 from pathlib import Path
 import os
-repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini')
+repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini-public')
 sys.path.append(repo_path)
 
 from qgis.PyQt.QtCore import QCoreApplication
