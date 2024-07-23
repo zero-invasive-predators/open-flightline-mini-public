@@ -159,13 +159,30 @@ def data_source_type(src_folder):
 
 class TracmapDataBatch:
 
-    def __init__(self, src_paths, src_type, coordinate_transform, machine_code, batch_id):
+    def __init__(self, src_paths, src_type, coordinate_transform, machine_code, batch_id,
+                 swath_translation=None):
         self.src_paths = src_paths
         self.src_type = src_type
         self.coordinate_transform = coordinate_transform
         self.machine_code = machine_code
         self.batch_id = batch_id
         self.layers = {}
+        self.swath_translation = swath_translation
+
+    def translate_swath(self, swath_width):
+        """
+        The map/dictionary stored in the heli_info table is a dict of strings.
+        Need to convert incoming values from tracmap data (usually floats) into
+        strings so that they match.
+        :param swath_width:
+        :return:
+        """
+        if not self.swath_translation:
+            return swath_width
+        elif self.swath_translation.get(str(swath_width)):
+            return float(self.swath_translation.get(str(swath_width)))
+        else:
+            return swath_width
 
     def read_datasource(self):
         self.__read_features__()
@@ -205,7 +222,7 @@ class TracmapDataBatch:
         template_layer = project_setup.generate_table_staging_heli_points()
         coordinate_transform = self.coordinate_transform
         for feat in log_lyr.getFeatures():
-            swath_width = feat['width']
+            swath_width = self.translate_swath(feat['width'])
             if feat['speed'] < 0 or feat['speed'] is None:
                 continue
 
@@ -220,7 +237,7 @@ class TracmapDataBatch:
                 for i in range(len(vert_set)):
                     new_feat = QgsFeature(template_layer.fields())
                     new_feat['speed'] = feat['Speed']
-                    new_feat['width'] = feat['width']
+                    new_feat['width'] = swath_width
                     new_feat['altitude'] = feat['GPS Alt']
                     new_feat['machine_code'] = self.machine_code
                     new_feat['batch_id'] = self.batch_id
@@ -255,6 +272,7 @@ class TracmapDataBatch:
         # secondary_lyr
         #self.layers[secondary_lyr.name()] = {}
         for feat in secondary_lyr.getFeatures():
+            swath_width = self.translate_swath(feat['width'])
             new_geometry = feat.geometry()
             new_geometry.transform(coordinate_transform)
             new_feat = QgsFeature(template_layer.fields())
@@ -307,14 +325,14 @@ class TracmapDataBatch:
         self.layers[secondary_lyr.name()] = {}
         template_layer = project_setup.generate_table_heli_points()
         coordinate_transform = self.coordinate_transform
-
         for feat in secondary_lyr.getFeatures():
+            swath_width = self.translate_swath(feat['width'])
             new_feat = QgsFeature(template_layer.fields())
             new_feat['date_time'] = datetime.strptime(f"{feat['Date']}T{feat['Time']}", '%Y-%m-%dT%H:%M:%S')
             new_feat['speed'] = feat['Speed']
             new_feat['heading'] = feat['Heading']
             new_feat['altitude'] = feat['GPS Alt']
-            new_feat['width'] = feat['Width']
+            new_feat['width'] = swath_width
             new_feat['bucket_state'] = feat['BoomState']
             new_feat['machine_code'] = self.machine_code
             new_feat['batch_id'] = self.batch_id

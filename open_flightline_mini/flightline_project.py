@@ -985,3 +985,35 @@ class FlightlineProject:
         load_summary_lyr.commitChanges()
 
         return new_feat.attributes()
+
+    def zoom_to_flight_data_extent(self, machine_code, load_numbers):
+        """
+        Calculates the extent of the heli point data for the provided machine
+        and load numbers.
+        :param machine_code: str
+        :param load_numbers: list<int,int>
+        :return: extent
+        """
+
+        heli_points_lyr = self.gpkg_layer('heli_points')
+        expression = QgsExpression(f"\"machine_code\" ILIKE '{machine_code}' and \"load_number\" in {tuple(load_numbers)}")
+        request = QgsFeatureRequest(expression)
+
+        counter = 0
+        extent = {'xmin':10000000, 'ymin':10000000, 'xmax':0, 'ymax':0}
+
+        for feat in heli_points_lyr.getFeatures(request=request):
+            x = feat.geometry().asPoint().x()
+            y = feat.geometry().asPoint().y()
+            if x > extent['xmax']: extent['xmax'] = x
+            if x < extent['xmin']: extent['xmin'] = x
+            if y > extent['ymax']: extent['ymax'] = y
+            if y < extent['ymin']: extent['ymin'] = y
+
+        if extent == {'xmin':10000000, 'ymin':10000000, 'xmax':0, 'ymax':0}:
+            return None
+
+        return extent
+
+
+

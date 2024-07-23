@@ -13,7 +13,7 @@
 import sys
 from pathlib import Path
 import os
-repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini-public')
+repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini')
 sys.path.append(repo_path)
 
 from datetime import datetime
@@ -25,7 +25,9 @@ from qgis.core import (QgsProcessingParameterString,
                        QgsProject,
                        QgsProcessingParameterFile,
                        QgsCoordinateReferenceSystem,
-                       QgsCoordinateTransform)
+                       QgsCoordinateTransform,
+                       QgsRectangle)
+from qgis.utils import iface
 
 from qgis import processing
 from open_flightline_mini import flightline_project
@@ -231,11 +233,14 @@ class CopyTracmapDataUSB(QgsProcessingAlgorithm):
         feedback.pushInfo(f"{datetime.strftime(datetime.now(), '%H:%M:%S')}: Machine Code: {machine_code}")
         feedback.pushInfo(f"{datetime.strftime(datetime.now(), '%H:%M:%S')}: Batch ID: {batch_id}")
 
+        swath_translation = fl_project.get_machine_swath_translation(machine_code=machine_code)
+
         transfer_data = data_reader.TracmapDataBatch(src_paths=new_valid_folders,
                                                      src_type=data_sorce_type,
                                                      coordinate_transform=coordinate_transform,
                                                      machine_code=machine_code,
-                                                     batch_id=batch_id)
+                                                     batch_id=batch_id,
+                                                     swath_translation=swath_translation)
 
         feedback.pushInfo(f"{datetime.strftime(datetime.now(), '%H:%M:%S')}: Data Source Read")
         transfer_data.read_datasource()
@@ -256,6 +261,14 @@ class CopyTracmapDataUSB(QgsProcessingAlgorithm):
             summary = fl_project.calculate_summary_for_load_machine(machine_code, load)
             feedback.pushInfo(
                 f"{datetime.strftime(datetime.now(), '%H:%M:%S')}: Summary Details:{summary}")
+
+        # Zoom the map canvas to the new data extent
+        extent = fl_project.zoom_to_flight_data_extent(machine_code=machine_code, load_numbers=load_numbers)
+        #if extent:
+            #canvas = iface.mapCanvas()
+            #rectangle = QgsRectangle(extent['xmin'], extent['ymin'], extent['xmax'], extent['ymax'])
+            #canvas.setExtent(rectangle)
+            #canvas.refresh()
 
         fl_project.write_to_config_json()
         return {self.RESULS: 'Finished'}
