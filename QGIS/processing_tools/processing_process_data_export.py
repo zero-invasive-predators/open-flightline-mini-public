@@ -13,7 +13,7 @@
 import sys
 from pathlib import Path
 import os
-repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini')
+repo_path = os.path.join(Path.home(), 'Documents', 'Github', 'open-flightline-mini-public')
 sys.path.append(repo_path)
 
 from datetime import datetime
@@ -263,7 +263,7 @@ class CopyTracmapDataUSB(QgsProcessingAlgorithm):
                 f"{datetime.strftime(datetime.now(), '%H:%M:%S')}: Summary Details:{summary}")
 
         # Zoom the map canvas to the new data extent
-        extent = fl_project.zoom_to_flight_data_extent(machine_code=machine_code, load_numbers=load_numbers)
+        #extent = fl_project.zoom_to_flight_data_extent(machine_code=machine_code, load_numbers=load_numbers)
         #if extent:
             #canvas = iface.mapCanvas()
             #rectangle = QgsRectangle(extent['xmin'], extent['ymin'], extent['xmax'], extent['ymax'])
