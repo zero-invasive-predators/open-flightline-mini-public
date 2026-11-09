@@ -113,14 +113,20 @@ class FlightlineProject:
     def get_machine_swath_translation(self, machine_code):
         """Uses the heli_info table to translate the tracmap width into the
         buckets effective swath. ZIP uses a combination of point sowing,  trickle, 10% overlap,
-        50% overlap, full sow, 6gram and 12gram bait sizes."""
+        50% overlap, full sow, 6gram and 12gram bait sizes.
+        When a json is created in a gpkg through QGIS it sets the key as a string,
+        need to translate the keys to integers"""
+
 
         heli_info_lyr = self.gpkg_layer('heli_info')
-        features = [i['swath_translation'] for i in heli_info_lyr.getFeatures()
-                    if all([i['machine_code'] == machine_code, i['machine_active'] == 1])]
-        if len(features) == 0:
+        st = {}
+        for f in heli_info_lyr.getFeatures():
+            if f['machine_active'] == 1:
+                for key, value in f['swath_translation'].items():
+                    st[int(float(key))] = int(float(value))
+        if len(st) == 0:
             return {}
-        return features[0]
+        return st
 
     def gpkg_layer(self, layer_name):
         return QgsVectorLayer(self.gpkg_layer_path(layer_name), layer_name, 'ogr')
@@ -617,7 +623,7 @@ class FlightlineProject:
                 line_number += 1
 
             distance = line_string.length()
-            hectares = distance * feat['width'] / 10000
+            hectares = distance * feat['width'] / 10000.000
             sow_rate = load_kg_second / hectares
             speed = (seconds * distance) * 1.94384  # m/s to knots conversion
             sow_rates.append(sow_rate)

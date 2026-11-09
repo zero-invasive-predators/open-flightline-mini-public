@@ -177,7 +177,7 @@ def generate_table_heli_bait_lines():
     baiting coverage by pnt pairs
     """
 
-    heli_bait_lines_lyr = QgsVectorLayer("Linestring?crs=EPSG:2193", "heli_bait_lines", "memory")
+    heli_bait_lines_lyr = QgsVectorLayer("MultiLinestring?crs=EPSG:2193", "heli_bait_lines", "memory")
     provider = heli_bait_lines_lyr.dataProvider()
     provider.addAttributes([QgsField('id', QVariant.Int),
                             QgsField('src_id', QVariant.String),

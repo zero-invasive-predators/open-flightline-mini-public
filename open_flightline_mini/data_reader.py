@@ -179,8 +179,8 @@ class TracmapDataBatch:
         """
         if not self.swath_translation:
             return swath_width
-        elif self.swath_translation.get(str(swath_width)):
-            return float(self.swath_translation.get(str(swath_width)))
+        elif self.swath_translation.get(int(swath_width)):
+            return int(self.swath_translation.get(int(swath_width)))
         else:
             return swath_width
 
